@@ -1,10 +1,16 @@
 from __future__ import annotations
 
 import argparse
+import sys
 from dataclasses import dataclass, field
 from typing import Literal
 
-from leet import apply_leet, available_profiles, get_leet_profile
+from leet import (
+    DEFAULT_LEET_DENSITY,
+    apply_leet,
+    available_profiles,
+    get_leet_profile,
+)
 from satrovacki import (
     WORD_OR_OTHER_PATTERN,
     _contains_cyrillic,
@@ -19,6 +25,14 @@ ZaStyle = Literal["24", "z4"]
 NjeStyle = Literal["n73", "nj3", "њ"]
 
 
+def _ensure_utf8_stdout() -> None:
+    if hasattr(sys.stdout, "reconfigure"):
+        try:
+            sys.stdout.reconfigure(encoding="utf-8")
+        except OSError:
+            pass
+
+
 @dataclass(slots=True)
 class Leetrovacki:
     base_mode: BaseMode = "auto"
@@ -26,6 +40,8 @@ class Leetrovacki:
     nje_style: NjeStyle = "n73"
     prefix_style: str = "00"
     leet_profile: str = "basic"
+    leet_complexity: int = 0
+    leet_density: float = DEFAULT_LEET_DENSITY
     vowels: str = "aeiou"
     min_word_length: int = 3
     exceptions: dict[str, str] = field(default_factory=dict)
@@ -35,6 +51,7 @@ class Leetrovacki:
     _satro: Satrovacki = field(init=False, repr=False)
     _utro: Utrovacki = field(init=False, repr=False)
     _leet_map: dict[str, str] = field(init=False, repr=False)
+    _full_letter_leet: bool = field(init=False, repr=False)
 
     def __post_init__(self) -> None:
         if self.base_mode not in {"auto", "utro", "satro"}:
@@ -48,6 +65,10 @@ class Leetrovacki:
         if self.leet_map is None and self.leet_profile not in available_profiles():
             valid = ", ".join(available_profiles())
             raise ValueError(f"leet_profile must be one of: {valid}")
+        if not isinstance(self.leet_complexity, int) or self.leet_complexity < 0:
+            raise ValueError("leet_complexity must be a non-negative integer")
+        if not 0.0 <= self.leet_density <= 1.0:
+            raise ValueError("leet_density must be between 0.0 and 1.0")
 
         self._satro = Satrovacki(
             vowels=self.vowels,
@@ -56,7 +77,15 @@ class Leetrovacki:
             soft_tj_to_cyrillic=self.soft_tj_to_cyrillic,
             plain_c_target=self.plain_c_target,
         )
-        self._leet_map = get_leet_profile(self.leet_profile, self.leet_map)
+        self._leet_map = get_leet_profile(
+            self.leet_profile,
+            self.leet_map,
+            complexity=self.leet_complexity,
+        )
+        self._full_letter_leet = self.leet_map is not None or self.leet_profile in {
+            "readable",
+            "full",
+        }
         self._utro = Utrovacki(
             vowels=self.vowels,
             min_word_length=self.min_word_length,
@@ -121,9 +150,14 @@ class Leetrovacki:
 
         za_index = transformed.find("za")
         if za_index != -1:
-            transformed = (
-                f"{transformed[:za_index]}{self.za_style}{transformed[za_index + 2:]}"
-            )
+            left = transformed[:za_index]
+            right = transformed[za_index + 2 :]
+            if self._full_letter_leet:
+                left = apply_leet(left, self._leet_map, density=self.leet_density)
+                right = apply_leet(right, self._leet_map, density=self.leet_density)
+            transformed = f"{left}{self.za_style}{right}"
+        elif self._full_letter_leet:
+            transformed = apply_leet(transformed, self._leet_map, density=self.leet_density)
 
         if transformed.endswith("nje"):
             suffix = self._nje_replacement(output_script_is_cyrillic)
@@ -139,7 +173,7 @@ class Leetrovacki:
         return self.nje_style
 
     def _leetify_satro(self, word: str) -> str:
-        return apply_leet(word, self._leet_map)
+        return apply_leet(word, self._leet_map, density=self.leet_density)
 
     def _apply_case(self, original: str, transformed: str) -> str:
         if original.isupper():
@@ -152,6 +186,7 @@ class Leetrovacki:
 
 
 def main() -> None:
+    _ensure_utf8_stdout()
     parser = argparse.ArgumentParser(
         description="Leetrovacki encoder (leet over satrovacki/utrovacki)."
     )
@@ -178,7 +213,19 @@ def main() -> None:
         "--leet-profile",
         choices=list(available_profiles()),
         default="basic",
-        help="Leet letter replacement profile (basic or full).",
+        help="Leet letter replacement profile (basic/readable/full).",
+    )
+    parser.add_argument(
+        "--leet-density",
+        type=float,
+        default=DEFAULT_LEET_DENSITY,
+        help=f"Share of letters to transform (0.0 to 1.0, default: {DEFAULT_LEET_DENSITY}).",
+    )
+    parser.add_argument(
+        "--leet-complexity",
+        type=int,
+        default=0,
+        help="Variant depth for full profile (0 = first variant).",
     )
     args = parser.parse_args()
 
@@ -187,6 +234,8 @@ def main() -> None:
         za_style=args.za_style,
         nje_style=args.nje_style,
         leet_profile=args.leet_profile,
+        leet_complexity=args.leet_complexity,
+        leet_density=args.leet_density,
     )
     print(encoder.encode(" ".join(args.text)))
 

@@ -4,6 +4,8 @@ import re
 from dataclasses import dataclass, field
 from typing import Mapping
 
+DEFAULT_LEET_DENSITY = 0.86
+
 
 LEET_TABLE: dict[str, tuple[str, ...]] = {
     "a": ("4", "/\\", "@", "^", "(L", "/-\\"),
@@ -46,20 +48,58 @@ BASIC_LEET_PROFILE: dict[str, str] = {
     "z": "2",
 }
 
-# One canonical replacement for every letter A-Z.
-FULL_LEET_PROFILE: dict[str, str] = {
-    letter: variants[0] for letter, variants in LEET_TABLE.items()
-}
+def build_full_leet_profile(complexity: int = 0) -> dict[str, str]:
+    if not isinstance(complexity, int) or complexity < 0:
+        raise ValueError("complexity must be a non-negative integer")
 
-# Readability overrides for the default "full" profile.
-FULL_LEET_PROFILE.update(
-    {
-        "r": "ri2",
-    }
-)
+    profile: dict[str, str] = {}
+    for letter, variants in LEET_TABLE.items():
+        index = min(complexity, len(variants) - 1)
+        profile[letter] = variants[index]
+
+    # Backward-compatible default expected by existing examples.
+    if complexity == 0:
+        profile["r"] = "ri2"
+
+    return profile
+
+
+FULL_LEET_PROFILE: dict[str, str] = build_full_leet_profile()
+
+# Readable full profile: one replacement for every letter, but kept practical.
+# Values are selected from common/well-known leet variants.
+READABLE_FULL_PROFILE: dict[str, str] = {
+    "a": "4",
+    "b": "8",
+    "c": "(",
+    "d": "|)",
+    "e": "3",
+    "f": "ph",
+    "g": "6",
+    "h": "#",
+    "i": "1",
+    "j": "_|",
+    "k": "|<",
+    "l": "1",
+    "m": "^^",
+    "n": "^/",
+    "o": "0",
+    "p": "9",
+    "q": "0_",
+    "r": "ri2",
+    "s": "5",
+    "t": "7",
+    "u": "00",
+    "v": "\\/",
+    "w": "vv",
+    "x": "><",
+    "y": "`/",
+    "z": "2",
+}
 
 LEET_PROFILES: dict[str, dict[str, str]] = {
     "basic": BASIC_LEET_PROFILE,
+    "readable": READABLE_FULL_PROFILE,
     "full": FULL_LEET_PROFILE,
 }
 
@@ -72,10 +112,15 @@ def available_profiles() -> tuple[str, ...]:
 
 
 def get_leet_profile(
-    name: str = "basic", custom_map: Mapping[str, str] | None = None
+    name: str = "basic",
+    custom_map: Mapping[str, str] | None = None,
+    complexity: int = 0,
 ) -> dict[str, str]:
     if custom_map is not None:
         return {key.lower(): value for key, value in custom_map.items()}
+
+    if name.lower() == "full":
+        return build_full_leet_profile(complexity=complexity)
 
     profile = LEET_PROFILES.get(name.lower())
     if profile is None:
@@ -84,13 +129,28 @@ def get_leet_profile(
     return dict(profile)
 
 
-def apply_leet(text: str, mapping: Mapping[str, str]) -> str:
+def apply_leet(
+    text: str,
+    mapping: Mapping[str, str],
+    density: float = DEFAULT_LEET_DENSITY,
+) -> str:
+    if not 0.0 <= density <= 1.0:
+        raise ValueError("density must be between 0.0 and 1.0")
+
     transformed: list[str] = []
+    mapped_position = 0
     for char in text:
         replacement = mapping.get(char.lower())
         if replacement is None:
             transformed.append(char)
             continue
+
+        if density < 1.0:
+            mapped_position += 1
+            score = ((mapped_position * 131) + (ord(char.lower()) * 17)) % 100
+            if score >= int(density * 100):
+                transformed.append(char)
+                continue
 
         if char.isupper() and replacement.isalpha():
             transformed.append(replacement.upper())
@@ -116,10 +176,16 @@ def looks_like_leet(text: str) -> bool:
 class LeetEncoder:
     profile: str = "basic"
     custom_map: Mapping[str, str] | None = None
+    complexity: int = 0
+    density: float = DEFAULT_LEET_DENSITY
     _mapping: dict[str, str] = field(init=False, repr=False)
 
     def __post_init__(self) -> None:
-        self._mapping = get_leet_profile(self.profile, self.custom_map)
+        self._mapping = get_leet_profile(
+            self.profile,
+            self.custom_map,
+            complexity=self.complexity,
+        )
 
     def encode(self, text: str) -> str:
-        return apply_leet(text, self._mapping)
+        return apply_leet(text, self._mapping, density=self.density)

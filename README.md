@@ -142,6 +142,27 @@ py skrit.py --mode leet --leet-profile full "Zemun zakon matori"
 /\/\(_)^/23 >|0^/24 70ri21/\/\4
 ```
 
+`full` uses the full per-letter variant table from `leet.py` (`LEET_TABLE`).
+You can choose deeper variants with `--leet-complexity`.
+
+```bash
+py skrit.py --mode leet --leet-profile full --leet-complexity 2 "Zemun zakon matori"
+```
+
+```text
+[v]v/\/-/_[- 1<oh/\/-/_@ -|-oh|`][[v]@
+```
+
+### Readable full leet with density control
+
+```bash
+py skrit.py --mode leet --leet-profile readable --leet-density 0.5 "Zemun zakon matori"
+```
+
+```text
+Munze k0nz4 70ri21^^4
+```
+
 ### Cyrillic option examples
 
 ```bash
@@ -201,7 +222,9 @@ The CLI supports:
 - `--plain-c-target {ц,ч,ћ}`
 - `--soft-tj`
 - `--leet-base {auto,satro,utro}`
-- `--leet-profile {basic,full}`
+- `--leet-profile {basic,readable,full}`
+- `--leet-complexity`
+- `--leet-density` (default: `0.86`)
 - `--za-style {24,z4}`
 - `--nje-style {n73,nj3,њ}`
 - `--utro-prefix`
@@ -281,6 +304,26 @@ py skrit.py --mode leet --leet-profile full "Zemun zakon matori"
 /\/\(_)^/23 >|0^/24 70ri21/\/\4
 ```
 
+### `--leet-complexity`
+
+```bash
+py skrit.py --mode leet --leet-profile full --leet-complexity 2 "Zemun zakon matori"
+```
+
+```text
+[v]v/\/-/_[- 1<oh/\/-/_@ -|-oh|`][[v]@
+```
+
+### `--leet-density`
+
+```bash
+py skrit.py --mode leet --leet-profile readable --leet-density 0.5 "Zemun zakon matori"
+```
+
+```text
+Munze k0nz4 70ri21^^4
+```
+
 ### `--za-style`
 
 ```bash
@@ -338,3 +381,13 @@ See `LICENSE` for the full text.
 ```bash
 python -m unittest discover -s tests -p "test_*.py" -v
 ```
+
+## Local Commit Gate (Coverage 100%)
+
+Enable repo hooks:
+
+```bash
+git config core.hooksPath .githooks
+```
+
+With this enabled, `pre-commit` runs tests under coverage and blocks commit unless coverage stays at 100% (from `.coveragerc`).

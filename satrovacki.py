@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import re
+import sys
 from dataclasses import dataclass, field
 
 
@@ -146,6 +147,14 @@ OPTIONAL_TJ_TO_CYR: dict[str, str] = {
 }
 
 
+def _ensure_utf8_stdout() -> None:
+    if hasattr(sys.stdout, "reconfigure"):
+        try:
+            sys.stdout.reconfigure(encoding="utf-8")
+        except OSError:
+            pass
+
+
 def _is_cyrillic_char(char: str) -> bool:
     return ("\u0400" <= char <= "\u04FF") or ("\u0500" <= char <= "\u052F")
 
@@ -273,6 +282,7 @@ class Satrovacki:
 
 
 def main() -> None:
+    _ensure_utf8_stdout()
     parser = argparse.ArgumentParser(
         description="Satrovacki encoder (Latin + Cyrillic support)."
     )

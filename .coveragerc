@@ -1,0 +1,13 @@
+[run]
+branch = True
+source =
+    leet
+    leetrovacki
+    satrovacki
+    skrit
+    utrovacki
+
+[report]
+fail_under = 100
+show_missing = True
+skip_covered = False

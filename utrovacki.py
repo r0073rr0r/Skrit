@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import sys
 
 from satrovacki import (
     Satrovacki,
@@ -77,7 +78,16 @@ class Utrovacki(Satrovacki):
         return self._apply_case(word, transformed)
 
 
+def _ensure_utf8_stdout() -> None:
+    if hasattr(sys.stdout, "reconfigure"):
+        try:
+            sys.stdout.reconfigure(encoding="utf-8")
+        except OSError:
+            pass
+
+
 def main() -> None:
+    _ensure_utf8_stdout()
     parser = argparse.ArgumentParser(
         description="Utrovacki encoder (Latin + Cyrillic support)."
     )

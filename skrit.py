@@ -1,14 +1,23 @@
 from __future__ import annotations
 
 import argparse
+import sys
 from typing import Literal
 
-from leet import available_profiles, looks_like_leet
+from leet import DEFAULT_LEET_DENSITY, available_profiles, looks_like_leet
 from leetrovacki import Leetrovacki
 from satrovacki import WORD_OR_OTHER_PATTERN, Satrovacki, _cyrillic_to_latin
 from utrovacki import Utrovacki
 
 SkritMode = Literal["auto", "satro", "utro", "leet"]
+
+
+def _ensure_utf8_stdout() -> None:
+    if hasattr(sys.stdout, "reconfigure"):
+        try:
+            sys.stdout.reconfigure(encoding="utf-8")
+        except OSError:
+            pass
 
 
 def _looks_like_utro_word(word: str) -> bool:
@@ -63,6 +72,8 @@ def encode_text(
     soft_tj_to_cyrillic: bool = False,
     leet_base: Literal["auto", "satro", "utro"] = "auto",
     leet_profile: str = "basic",
+    leet_complexity: int = 0,
+    leet_density: float = DEFAULT_LEET_DENSITY,
     za_style: Literal["24", "z4"] = "24",
     nje_style: Literal["n73", "nj3", "њ"] = "n73",
     utro_prefix: str = "u",
@@ -106,6 +117,8 @@ def encode_text(
         plain_c_target=plain_c_target,
         soft_tj_to_cyrillic=soft_tj_to_cyrillic,
         leet_profile=leet_profile,
+        leet_complexity=leet_complexity,
+        leet_density=leet_density,
         za_style=za_style,
         nje_style=nje_style,
     )
@@ -113,6 +126,7 @@ def encode_text(
 
 
 def main() -> None:
+    _ensure_utf8_stdout()
     parser = argparse.ArgumentParser(
         description="Unified encoder router for satrovacki, utrovacki and leetrovacki."
     )
@@ -161,7 +175,19 @@ def main() -> None:
         "--leet-profile",
         choices=list(available_profiles()),
         default="basic",
-        help="Leet profile (basic/full).",
+        help="Leet profile (basic/readable/full).",
+    )
+    parser.add_argument(
+        "--leet-density",
+        type=float,
+        default=DEFAULT_LEET_DENSITY,
+        help=f"Share of letters to transform in leet mode (0.0 to 1.0, default: {DEFAULT_LEET_DENSITY}).",
+    )
+    parser.add_argument(
+        "--leet-complexity",
+        type=int,
+        default=0,
+        help="Variant depth for full profile (0 = first variant).",
     )
     parser.add_argument(
         "--za-style",
@@ -202,6 +228,8 @@ def main() -> None:
         soft_tj_to_cyrillic=args.soft_tj,
         leet_base=args.leet_base,
         leet_profile=args.leet_profile,
+        leet_complexity=args.leet_complexity,
+        leet_density=args.leet_density,
         za_style=args.za_style,
         nje_style=args.nje_style,
         utro_prefix=args.utro_prefix,

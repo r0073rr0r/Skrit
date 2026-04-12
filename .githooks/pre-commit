@@ -1,0 +1,22 @@
+#!/usr/bin/env sh
+set -eu
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+cd "$REPO_ROOT"
+
+if command -v py >/dev/null 2>&1; then
+  PYTHON_CMD="py"
+elif command -v python3 >/dev/null 2>&1; then
+  PYTHON_CMD="python3"
+elif command -v python >/dev/null 2>&1; then
+  PYTHON_CMD="python"
+else
+  echo "[pre-commit] Python is not available in PATH."
+  exit 1
+fi
+
+echo "[pre-commit] Running unit tests with coverage (required: 100%)."
+"$PYTHON_CMD" -m coverage erase
+"$PYTHON_CMD" -m coverage run -m unittest discover -s tests -p "test_*.py"
+"$PYTHON_CMD" -m coverage report
+echo "[pre-commit] Coverage gate passed."
