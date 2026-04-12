@@ -35,4 +35,6 @@ Thumbs.db
 *.pid
 *.seed
 *.backup
+.pypirc
 *.env.*
+.pypirc

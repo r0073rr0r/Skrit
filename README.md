@@ -1,5 +1,12 @@
 # Skrit
 
+[![PyPI](https://img.shields.io/pypi/v/skrit)](https://pypi.org/project/skrit/)
+[![Python](https://img.shields.io/pypi/pyversions/skrit)](https://pypi.org/project/skrit/)
+[![License: GPL-3.0-or-later](https://img.shields.io/badge/License-GPL--3.0--or--later-blue.svg)](LICENSE)
+<!-- [![CI](https://img.shields.io/github/actions/workflow/status/r0073rr0r/Skrit/ci.yml?branch=main&label=CI)](https://github.com/r0073rr0r/Skrit/actions/workflows/ci.yml) -->
+[![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)](.coveragerc)
+[![PyPI Downloads](https://img.shields.io/pypi/dm/skrit)](https://pypi.org/project/skrit/)
+
 Skrit is a Python toolkit for Serbian slang-style text transforms:
 
 - `satrovacki` (base split/swap transform)
@@ -32,7 +39,33 @@ Future direction may include:
 
 - Python 3.10+
 
-## Quick Start
+## Install from PyPI
+
+```bash
+python -m pip install --upgrade skrit
+```
+
+## Quick Start (installed CLI)
+
+```bash
+skrit --mode auto "Zemun zakon matori"
+```
+
+Output:
+
+```text
+Munze konza matori
+```
+
+You also get direct command entry points:
+
+```bash
+satrovacki "Zemun zakon matori"
+utrovacki "Zemun zakon matori"
+leetrovacki --mode satro "Zemun zakon matori"
+```
+
+## Quick Start (local repo script)
 
 ```bash
 py skrit.py --mode auto "Zemun zakon matori"
@@ -41,6 +74,23 @@ py skrit.py --mode auto "Zemun zakon matori"
 Output:
 
 ```text
+Munze konza matori
+```
+
+## Python API Example
+
+```python
+from skrit import encode_text
+
+encoded, mode = encode_text("Zemun zakon matori", mode="auto")
+print(mode)
+print(encoded)
+```
+
+Output:
+
+```text
+satro
 Munze konza matori
 ```
 
@@ -361,15 +411,6 @@ xzenyybazz
 - `utrovacki.py` - utro transformer
 - `leet.py` - leet table + profiles + helper API
 - `leetrovacki.py` - leet transformer on top of satro/utro
-
-## Community Standards
-
-- `CODE_OF_CONDUCT.md`
-- `CONTRIBUTING.md`
-- `SECURITY.md`
-- `SUPPORT.md`
-- `.github/ISSUE_TEMPLATE/*`
-- `.github/PULL_REQUEST_TEMPLATE.md`
 
 ## License
 
