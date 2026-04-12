@@ -382,6 +382,29 @@ See `LICENSE` for the full text.
 python -m unittest discover -s tests -p "test_*.py" -v
 ```
 
+## PyPI Packaging
+
+Package metadata is defined in `pyproject.toml` (distribution name: `skrit-r0073rr0r`).
+
+Build locally:
+
+```bash
+python -m pip install --upgrade build twine
+python -m build
+python -m twine check dist/*
+```
+
+Install locally from built wheel:
+
+```bash
+python -m pip install dist/skrit_r0073rr0r-0.3.0-py3-none-any.whl
+```
+
+Publish:
+
+- Manual: `python -m twine upload dist/*` (with `TWINE_USERNAME=__token__` and `TWINE_PASSWORD=<pypi-token>`)
+- GitHub Actions: release publish workflow in `.github/workflows/publish.yml` (Trusted Publishing)
+
 ## Local Commit Gate (Coverage 100%)
 
 Enable repo hooks:

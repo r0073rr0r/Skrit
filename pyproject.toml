@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=77", "wheel", "build"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "skrit-r0073rr0r"
+version = "0.3.0"
+description = "Serbian street-slang text transformations: satrovacki, utrovacki and leetrovacki."
+readme = "README.md"
+requires-python = ">=3.10"
+license = "GPL-3.0-or-later"
+license-files = ["LICENSE"]
+authors = [
+  { name = "Velimir Majstorov", email = "majstorov@gmail.com" }
+]
+keywords = ["serbian", "satrovacki", "utrovacki", "leet", "cli", "text-transform"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Software Development :: Libraries",
+  "Topic :: Text Processing",
+]
+
+[project.urls]
+Homepage = "https://github.com/r0073rr0r/Skrit"
+Repository = "https://github.com/r0073rr0r/Skrit"
+Issues = "https://github.com/r0073rr0r/Skrit/issues"
+
+[project.scripts]
+skrit = "skrit:main"
+satrovacki = "satrovacki:main"
+utrovacki = "utrovacki:main"
+leetrovacki = "leetrovacki:main"
+
+[tool.setuptools]
+py-modules = ["skrit", "satrovacki", "utrovacki", "leet", "leetrovacki"]
