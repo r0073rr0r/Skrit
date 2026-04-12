@@ -438,7 +438,7 @@ python -m twine check dist/*
 Install locally from built wheel:
 
 ```bash
-python -m pip install dist/skrit-0.3.0-py3-none-any.whl
+python -m pip install dist/skrit-0.3.1-py3-none-any.whl
 ```
 
 Publish:
