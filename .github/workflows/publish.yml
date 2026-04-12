@@ -37,7 +37,7 @@ jobs:
       id-token: write
     environment:
       name: pypi
-      url: https://pypi.org/project/skrit-r0073rr0r/
+      url: https://pypi.org/project/skrit/
     steps:
       - name: Download dist artifacts
         uses: actions/download-artifact@v4

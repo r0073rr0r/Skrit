@@ -384,7 +384,7 @@ python -m unittest discover -s tests -p "test_*.py" -v
 
 ## PyPI Packaging
 
-Package metadata is defined in `pyproject.toml` (distribution name: `skrit-r0073rr0r`).
+Package metadata is defined in `pyproject.toml` (distribution name: `skrit`).
 
 Build locally:
 
@@ -397,7 +397,7 @@ python -m twine check dist/*
 Install locally from built wheel:
 
 ```bash
-python -m pip install dist/skrit_r0073rr0r-0.3.0-py3-none-any.whl
+python -m pip install dist/skrit-0.3.0-py3-none-any.whl
 ```
 
 Publish:
