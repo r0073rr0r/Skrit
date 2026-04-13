@@ -1,15 +1,14 @@
 [build-system]
-requires = ["setuptools>=77", "wheel", "build"]
+requires = ["setuptools>=69", "wheel", "build"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "skrit"
-version = "0.3.1"
+version = "0.4.0"
 description = "Serbian street-slang text transformations: satrovacki, utrovacki and leetrovacki."
 readme = "README.md"
 requires-python = ">=3.10"
-license = "GPL-3.0-or-later"
-license-files = ["LICENSE"]
+license = { text = "GPL-3.0-or-later" }
 authors = [
   { name = "Velimir Majstorov", email = "majstorov@gmail.com" }
 ]
@@ -38,3 +37,4 @@ leetrovacki = "leetrovacki:main"
 
 [tool.setuptools]
 py-modules = ["skrit", "satrovacki", "utrovacki", "leet", "leetrovacki"]
+license-files = ["LICENSE"]
