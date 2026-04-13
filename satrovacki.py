@@ -314,6 +314,9 @@ class Satrovacki:
         if replaced is not None:
             return replaced
 
+        return self._encode_latin_word_plain(lower_word)
+
+    def _encode_latin_word_plain(self, lower_word: str) -> str:
         split_index = self._find_split_index(lower_word)
         if split_index <= 0 or split_index >= len(lower_word):
             return lower_word
@@ -323,7 +326,9 @@ class Satrovacki:
         candidates: list[tuple[int, str]] = []
         for split_index in range(1, len(lower_word)):
             candidate = lower_word[-split_index:] + lower_word[:-split_index]
-            if self._encode_latin_word(candidate) == lower_word:
+            encoded_with_exceptions = self._encode_latin_word(candidate)
+            encoded_plain = self._encode_latin_word_plain(candidate)
+            if encoded_with_exceptions == lower_word or encoded_plain == lower_word:
                 candidates.append((split_index, candidate))
         return candidates
 

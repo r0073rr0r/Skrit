@@ -34,6 +34,7 @@ class TestSatrovackiEncode(unittest.TestCase):
         self.assertEqual(self.encoder.decode("munze konza"), "zemun zakon")
         self.assertEqual(self.encoder.decode("Munze konza"), "Zemun zakon")
         self.assertEqual(self.encoder.decode("мунзе конза"), "земун закон")
+        self.assertEqual(self.encoder.decode("torima"), "matori")
         self.assertEqual(self.encoder.decode("zemun zakon"), "zemun zakon")
 
     def test_can_decode_word(self) -> None:

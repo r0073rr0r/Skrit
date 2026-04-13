@@ -26,6 +26,10 @@ class TestSkriptRouter(unittest.TestCase):
         self.assertEqual(mode, "satro")
         self.assertEqual(decoded, "zemun zakon")
 
+        decoded_torima, mode_torima = encode_text("torima", mode="auto")
+        self.assertEqual(mode_torima, "satro")
+        self.assertEqual(decoded_torima, "matori")
+
     def test_auto_decodes_utro_input(self) -> None:
         decoded, mode = encode_text("uzenzabanje", mode="auto")
         self.assertEqual(mode, "utro")
