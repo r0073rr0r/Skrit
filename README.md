@@ -15,6 +15,9 @@ Skrit is a Python toolkit for Serbian slang-style text transforms:
 
 The main entry point is `skrit.py` (router + CLI).
 
+Auto mode is bidirectional: it can encode plain text and decode already
+encoded satro/utro/leet text back to plain form.
+
 ## Project Story
 
 Skrit is a recreation of an older idea.
@@ -96,7 +99,7 @@ Munze konza matori
 
 ## Modes
 
-- `--mode auto` - detect and choose module automatically (`satro`, `utro`, or `leet`)
+- `--mode auto` - detect style and direction automatically (`satro`, `utro`, or `leet`; encode or decode)
 - `--mode satro` - force satrovacki
 - `--mode utro` - force utrovacki
 - `--mode leet` - force leetrovacki
@@ -111,6 +114,32 @@ py skrit.py --mode auto "Zemun zakon matori"
 
 ```text
 Munze konza matori
+```
+
+Auto decode examples:
+
+```bash
+py skrit.py --mode auto "munze konza"
+```
+
+```text
+zemun zakon
+```
+
+```bash
+py skrit.py --mode auto "uzenzabanje"
+```
+
+```text
+bazen
+```
+
+```bash
+py skrit.py --mode auto "m00n23 k0n24"
+```
+
+```text
+zemun zakon
 ```
 
 ### Satro
