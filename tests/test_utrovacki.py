@@ -47,6 +47,30 @@ class TestUtrovackiEncode(unittest.TestCase):
         custom = Utrovacki(prefix="x", infix="yy", suffix="zz")
         self.assertEqual(custom.encode("bazen"), "xzenyybazz")
 
+    def test_decode_examples(self) -> None:
+        self.assertEqual(self.encoder.decode("uzenzabanje"), "bazen")
+        self.assertEqual(self.encoder.decode("Uzenzabanje"), "Bazen")
+        self.assertEqual(self.encoder.decode("узензабање"), "базен")
+        self.assertEqual(self.encoder.decode("bazen"), "bazen")
+
+    def test_can_decode_word(self) -> None:
+        self.assertTrue(self.encoder.can_decode_word("uzenzabanje"))
+        self.assertTrue(self.encoder.can_decode_word("узензабање"))
+        self.assertFalse(self.encoder.can_decode_word("bazen"))
+
+    def test_decode_short_and_non_word_parts(self) -> None:
+        self.assertEqual(self.encoder.decode_word("ab"), "ab")
+        self.assertEqual(self.encoder.decode("uzenzabanje, test!"), "bazen, test!")
+
+    def test_split_encoded_parts_edge_cases(self) -> None:
+        self.assertIsNone(self.encoder._split_encoded_parts("bazen"))
+        self.assertIsNone(self.encoder._split_encoded_parts("uzenzaban"))
+        self.assertIsNone(self.encoder._split_encoded_parts("u"))
+        self.assertIsNone(self.encoder._split_encoded_parts("unje"))
+        self.assertIsNone(self.encoder._split_encoded_parts("uxxxnje"))
+        self.assertIsNone(self.encoder._split_encoded_parts("uzanje"))
+        self.assertFalse(self.encoder.can_decode_word("ab"))
+
 
 if __name__ == "__main__":
     unittest.main()

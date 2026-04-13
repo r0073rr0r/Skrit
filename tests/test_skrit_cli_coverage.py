@@ -19,6 +19,8 @@ class TestSkritDetectionCoverage(unittest.TestCase):
 
     def test_detect_mode_no_words_fallback(self) -> None:
         self.assertEqual(detect_mode("123 !!!"), "satro")
+        self.assertEqual(detect_mode("uzenzabanje"), "utro")
+        self.assertEqual(detect_mode("m00n23"), "leet")
 
     def test_ensure_utf8_stdout_handles_oserror(self) -> None:
         class BrokenStdout:

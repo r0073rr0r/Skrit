@@ -1,6 +1,13 @@
 import unittest
 
-from skrit import _looks_like_satro_encoded, detect_mode, encode_text
+from skrit import (
+    _deleet_text_basic,
+    _looks_like_leetrovacki,
+    _looks_like_satro_encoded,
+    _looks_like_utrovacki,
+    detect_mode,
+    encode_text,
+)
 
 
 class TestSkriptRouter(unittest.TestCase):
@@ -18,6 +25,11 @@ class TestSkriptRouter(unittest.TestCase):
         decoded, mode = encode_text("munze konza", mode="auto")
         self.assertEqual(mode, "satro")
         self.assertEqual(decoded, "zemun zakon")
+
+    def test_auto_decodes_utro_input(self) -> None:
+        decoded, mode = encode_text("uzenzabanje", mode="auto")
+        self.assertEqual(mode, "utro")
+        self.assertEqual(decoded, "bazen")
 
     def test_auto_routes_to_leet(self) -> None:
         encoded, mode = encode_text("Zemun zakon matori", mode="auto", detect_from="M00n23")
@@ -55,6 +67,34 @@ class TestSkriptRouter(unittest.TestCase):
 
     def test_satro_encoded_detector_with_no_words(self) -> None:
         self.assertFalse(_looks_like_satro_encoded("123 !!!"))
+
+    def test_utro_and_leet_detectors(self) -> None:
+        self.assertTrue(_looks_like_utrovacki("uzenzabanje"))
+        self.assertFalse(_looks_like_utrovacki("bazen"))
+        self.assertTrue(_looks_like_leetrovacki("m00n23 k0n24"))
+        self.assertTrue(_looks_like_leetrovacki("/\\/\\470ri21"))
+        self.assertFalse(_looks_like_leetrovacki("zemun zakon"))
+        self.assertFalse(_looks_like_leetrovacki(""))
+
+    def test_auto_decodes_leet_inputs(self) -> None:
+        decoded_satro, mode_satro = encode_text("m00n23 k0n24", mode="auto")
+        self.assertEqual(mode_satro, "leet")
+        self.assertEqual(decoded_satro, "zemun zakon")
+
+        decoded_utro, mode_utro = encode_text("00zen24ban73", mode="auto")
+        self.assertEqual(mode_utro, "leet")
+        self.assertEqual(decoded_utro, "bazen")
+
+    def test_deleet_basic_helper(self) -> None:
+        self.assertEqual(_deleet_text_basic("m00n23"), "munze")
+        self.assertEqual(_deleet_text_basic("00zen24ban73"), "uzenzabanje")
+        self.assertEqual(_deleet_text_basic("M00N23"), "MUNZE")
+        self.assertEqual(_deleet_text_basic("Nj3"), "Nje")
+
+    def test_auto_leet_utro_fallback_returns_deleeted(self) -> None:
+        decoded, mode = encode_text("00n73 24", mode="auto")
+        self.assertEqual(mode, "leet")
+        self.assertEqual(decoded, "unje za")
 
 
 if __name__ == "__main__":

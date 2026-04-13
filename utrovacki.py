@@ -4,6 +4,7 @@ import argparse
 import sys
 
 from satrovacki import (
+    WORD_OR_OTHER_PATTERN,
     Satrovacki,
     _contains_cyrillic,
     _cyrillic_to_latin,
@@ -76,6 +77,71 @@ class Utrovacki(Satrovacki):
             )
 
         return self._apply_case(word, transformed)
+
+    def decode(self, text: str) -> str:
+        parts = WORD_OR_OTHER_PATTERN.findall(text)
+        decoded_parts: list[str] = []
+
+        for part in parts:
+            if part.isalpha():
+                decoded_parts.append(self.decode_word(part))
+            else:
+                decoded_parts.append(part)
+
+        return "".join(decoded_parts)
+
+    def decode_word(self, word: str) -> str:
+        if len(word) < self.min_word_length:
+            return word
+
+        output_script_is_cyrillic = _contains_cyrillic(word)
+        normalized_latin = _cyrillic_to_latin(word) if output_script_is_cyrillic else word
+        lower_word = normalized_latin.lower()
+
+        parsed = self._split_encoded_parts(lower_word)
+        if parsed is None:
+            transformed = lower_word
+        else:
+            first_part, second_part = parsed
+            transformed = first_part + second_part
+
+        if output_script_is_cyrillic:
+            transformed = _latin_to_cyrillic(
+                transformed,
+                use_tj_for_c=self.soft_tj_to_cyrillic,
+                plain_c_target=self.plain_c_target,
+            )
+
+        return self._apply_case(word, transformed)
+
+    def can_decode_word(self, word: str) -> bool:
+        if len(word) < self.min_word_length:
+            return False
+        normalized_latin = _cyrillic_to_latin(word) if _contains_cyrillic(word) else word
+        return self._split_encoded_parts(normalized_latin.lower()) is not None
+
+    def _split_encoded_parts(self, lower_word: str) -> tuple[str, str] | None:
+        if not lower_word.startswith(self.prefix):
+            return None
+        if self.suffix and not lower_word.endswith(self.suffix):
+            return None
+
+        end = len(lower_word) - len(self.suffix) if self.suffix else len(lower_word)
+        if end <= len(self.prefix):
+            return None
+
+        core = lower_word[len(self.prefix) : end]
+
+        split_at = core.rfind(self.infix)
+        if split_at < 0:
+            return None
+
+        second_part = core[:split_at]
+        first_part = core[split_at + len(self.infix) :]
+
+        if not second_part and not first_part:
+            return None
+        return first_part, second_part
 
 
 def _ensure_utf8_stdout() -> None:
