@@ -52,7 +52,7 @@ class TestSkritCliCoverage(unittest.TestCase):
         output = self._run_cli(
             ["skrit.py", "--mode", "auto", "--show-mode", "Zemun zakon matori"]
         )
-        self.assertEqual(output, "[mode=satro]\nMunze konza matori\n")
+        self.assertEqual(output, "[mode=satro]\nMunze konza torima\n")
 
     def test_main_leet_custom_flags(self) -> None:
         output = self._run_cli(

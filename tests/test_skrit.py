@@ -1,4 +1,5 @@
 import unittest
+from unittest.mock import patch
 
 from skrit import (
     _deleet_text_basic,
@@ -19,16 +20,21 @@ class TestSkriptRouter(unittest.TestCase):
     def test_auto_routes_to_satro(self) -> None:
         encoded, mode = encode_text("Zemun zakon matori", mode="auto")
         self.assertEqual(mode, "satro")
-        self.assertEqual(encoded, "Munze konza matori")
+        self.assertEqual(encoded, "Munze konza torima")
 
     def test_auto_decodes_satro_input(self) -> None:
         decoded, mode = encode_text("munze konza", mode="auto")
         self.assertEqual(mode, "satro")
         self.assertEqual(decoded, "zemun zakon")
 
-        decoded_torima, mode_torima = encode_text("torima", mode="auto")
+        decoded_torima, mode_torima = encode_text("munze konza torima", mode="auto")
         self.assertEqual(mode_torima, "satro")
-        self.assertEqual(decoded_torima, "matori")
+        self.assertEqual(decoded_torima, "zemun zakon matori")
+
+    def test_auto_encodes_ambiguous_plain_word(self) -> None:
+        encoded, mode = encode_text("marija", mode="auto")
+        self.assertEqual(mode, "satro")
+        self.assertEqual(encoded, "rijama")
 
     def test_auto_decodes_utro_input(self) -> None:
         decoded, mode = encode_text("uzenzabanje", mode="auto")
@@ -71,6 +77,22 @@ class TestSkriptRouter(unittest.TestCase):
 
     def test_satro_encoded_detector_with_no_words(self) -> None:
         self.assertFalse(_looks_like_satro_encoded("123 !!!"))
+        self.assertFalse(_looks_like_satro_encoded("matori"))
+        self.assertTrue(_looks_like_satro_encoded("munze torima"))
+
+    def test_satro_encoded_detector_no_changed_pairs(self) -> None:
+        class FakeSatro:
+            def __init__(self, **_: object) -> None:
+                pass
+
+            def can_decode_word(self, _word: str) -> bool:
+                return True
+
+            def decode_word(self, word: str) -> str:
+                return word
+
+        with patch("skrit.Satrovacki", FakeSatro):
+            self.assertFalse(_looks_like_satro_encoded("abc"))
 
     def test_utro_and_leet_detectors(self) -> None:
         self.assertTrue(_looks_like_utrovacki("uzenzabanje"))

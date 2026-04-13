@@ -9,12 +9,13 @@ class TestSatrovackiEncode(unittest.TestCase):
 
     def test_basic_examples_latin(self) -> None:
         self.assertEqual(self.encoder.encode("Beograd"), "Gradbeo")
-        self.assertEqual(self.encoder.encode("Zemun zakon matori"), "Munze konza matori")
+        self.assertEqual(self.encoder.encode("Zemun zakon matori"), "Munze konza torima")
+        self.assertEqual(self.encoder.encode("srbija"), "bijasr")
         self.assertEqual(self.encoder.encode("riba ribi grize rep"), "bari biri zegri pre")
 
     def test_basic_examples_cyrillic_and_mixed(self) -> None:
-        self.assertEqual(self.encoder.encode("Земун закон матори"), "Мунзе конза матори")
-        self.assertEqual(self.encoder.encode("Zemun закон matori"), "Munze конза matori")
+        self.assertEqual(self.encoder.encode("Земун закон матори"), "Мунзе конза торима")
+        self.assertEqual(self.encoder.encode("Zemun закон matori"), "Munze конза torima")
 
     def test_case_and_exceptions(self) -> None:
         self.assertEqual(self.encoder.encode("brate BRATE Brate"), "tebra TEBRA Tebra")
@@ -27,13 +28,14 @@ class TestSatrovackiEncode(unittest.TestCase):
         self.assertEqual(encoder.encode("riba rep"), "riba rep")
 
     def test_no_vowel_fallback(self) -> None:
-        self.assertEqual(self.encoder.encode("prst"), "stpr")
+        self.assertEqual(self.encoder.encode("hmn"), "mnh")
         self.assertEqual(self.encoder.encode("прст"), "стпр")
 
     def test_decode_examples(self) -> None:
         self.assertEqual(self.encoder.decode("munze konza"), "zemun zakon")
         self.assertEqual(self.encoder.decode("Munze konza"), "Zemun zakon")
         self.assertEqual(self.encoder.decode("мунзе конза"), "земун закон")
+        self.assertEqual(self.encoder.decode("bijasr"), "srbija")
         self.assertEqual(self.encoder.decode("torima"), "matori")
         self.assertEqual(self.encoder.decode("zemun zakon"), "zemun zakon")
 
@@ -42,14 +44,22 @@ class TestSatrovackiEncode(unittest.TestCase):
         self.assertTrue(self.encoder.can_decode_word("конза"))
         self.assertFalse(self.encoder.can_decode_word("zemun"))
 
-    def test_decode_short_word_and_exception_path(self) -> None:
+    def test_decode_short_word_and_custom_exception_path(self) -> None:
         self.assertEqual(self.encoder.decode_word("ab"), "ab")
-        self.assertEqual(self.encoder.decode_word("tebra"), "brate")
+        custom = Satrovacki(exceptions={"brate": "tebra"})
+        self.assertEqual(custom.decode_word("tebra"), "brate")
 
     def test_can_decode_word_short_and_encode_latin_helpers(self) -> None:
         self.assertFalse(self.encoder.can_decode_word("ab"))
-        self.assertEqual(self.encoder._encode_latin_word("brate"), "tebra")
+        custom = Satrovacki(exceptions={"brate": "tebra"})
+        self.assertTrue(custom.can_decode_word("tebra"))
+        self.assertEqual(custom._encode_latin_word("brate"), "tebra")
         self.assertEqual(self.encoder._encode_latin_word("a"), "a")
+
+    def test_r_can_be_syllabic_vowel(self) -> None:
+        self.assertEqual(self.encoder.encode("srbija"), "bijasr")
+        self.assertFalse(self.encoder._is_vowel_at("abc", -1))
+        self.assertFalse(self.encoder._is_vowel_at("abc", 10))
 
 
 class TestCyrillicOptions(unittest.TestCase):

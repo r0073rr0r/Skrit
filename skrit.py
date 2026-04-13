@@ -143,8 +143,26 @@ def _looks_like_satro_encoded(
     if not words:
         return False
 
-    decodable_words = sum(1 for word in words if satro.can_decode_word(word))
-    return decodable_words > 0 and (decodable_words / len(words)) >= 0.5
+    decodable_words = [word for word in words if satro.can_decode_word(word)]
+    if not decodable_words:
+        return False
+    if (len(decodable_words) / len(words)) < 0.5:
+        return False
+
+    decoded_pairs = [
+        (original, satro.decode_word(original))
+        for original in words
+        if original.lower() != satro.decode_word(original).lower()
+    ]
+    if not decoded_pairs:
+        return False
+
+    improved_words = sum(
+        1
+        for original, decoded in decoded_pairs
+        if satro.can_decode_word(original) and not satro.can_decode_word(decoded)
+    )
+    return improved_words > 0
 
 
 def _deleet_text_basic(text: str) -> str:

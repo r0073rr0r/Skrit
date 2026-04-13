@@ -209,12 +209,7 @@ def _latin_to_cyrillic(
 class Satrovacki:
     vowels: str = "aeiou"
     min_word_length: int = 3
-    exceptions: dict[str, str] = field(
-        default_factory=lambda: {
-            "brate": "tebra",
-            "matori": "matori",
-        }
-    )
+    exceptions: dict[str, str] = field(default_factory=dict)
     soft_tj_to_cyrillic: bool = False
     plain_c_target: str = "ц"
 
@@ -336,12 +331,11 @@ class Satrovacki:
         self, candidates: list[tuple[int, str]]
     ) -> str:
         half = len(candidates[0][1]) / 2.0
-        vowels = self.vowels.lower()
 
         def score(item: tuple[int, str]) -> tuple[float, int, int, int]:
             split_index, candidate = item
-            second_is_vowel = int(len(candidate) > 1 and candidate[1] in vowels)
-            starts_with_consonant = int(candidate and candidate[0] not in vowels)
+            second_is_vowel = int(len(candidate) > 1 and self._is_vowel_at(candidate, 1))
+            starts_with_consonant = int(candidate and not self._is_vowel_at(candidate, 0))
             return (
                 abs(split_index - half),
                 -second_is_vowel,
@@ -352,16 +346,31 @@ class Satrovacki:
         return min(candidates, key=score)[1]
 
     def _find_split_index(self, word: str) -> int:
-        vowels = self.vowels.lower()
-
         for index, char in enumerate(word):
-            if char in vowels:
+            if self._is_vowel_at(word, index):
                 split_index = index + 1
-                while split_index < len(word) and word[split_index] in vowels:
+                while split_index < len(word) and self._is_vowel_at(word, split_index):
                     split_index += 1
                 return split_index
 
         return len(word) // 2
+
+    def _is_vowel_at(self, word: str, index: int) -> bool:
+        vowels = self.vowels.lower()
+        if index < 0 or index >= len(word):
+            return False
+
+        current = word[index]
+        if current in vowels:
+            return True
+
+        # Syllabic R: treat 'r' as a vowel when it is between consonants.
+        if current != "r" or index == 0 or index == len(word) - 1:
+            return False
+
+        prev_char = word[index - 1]
+        next_char = word[index + 1]
+        return prev_char not in vowels and next_char not in vowels
 
     def _apply_case(self, original: str, transformed: str) -> str:
         if original.isupper():
