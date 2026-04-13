@@ -1,6 +1,6 @@
 import unittest
 
-from skrit import detect_mode, encode_text
+from skrit import _looks_like_satro_encoded, detect_mode, encode_text
 
 
 class TestSkriptRouter(unittest.TestCase):
@@ -13,6 +13,11 @@ class TestSkriptRouter(unittest.TestCase):
         encoded, mode = encode_text("Zemun zakon matori", mode="auto")
         self.assertEqual(mode, "satro")
         self.assertEqual(encoded, "Munze konza matori")
+
+    def test_auto_decodes_satro_input(self) -> None:
+        decoded, mode = encode_text("munze konza", mode="auto")
+        self.assertEqual(mode, "satro")
+        self.assertEqual(decoded, "zemun zakon")
 
     def test_auto_routes_to_leet(self) -> None:
         encoded, mode = encode_text("Zemun zakon matori", mode="auto", detect_from="M00n23")
@@ -47,6 +52,9 @@ class TestSkriptRouter(unittest.TestCase):
         )
         self.assertEqual(mode, "leet")
         self.assertEqual(encoded, "/\\")
+
+    def test_satro_encoded_detector_with_no_words(self) -> None:
+        self.assertFalse(_looks_like_satro_encoded("123 !!!"))
 
 
 if __name__ == "__main__":

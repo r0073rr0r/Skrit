@@ -30,6 +30,26 @@ class TestSatrovackiEncode(unittest.TestCase):
         self.assertEqual(self.encoder.encode("prst"), "stpr")
         self.assertEqual(self.encoder.encode("прст"), "стпр")
 
+    def test_decode_examples(self) -> None:
+        self.assertEqual(self.encoder.decode("munze konza"), "zemun zakon")
+        self.assertEqual(self.encoder.decode("Munze konza"), "Zemun zakon")
+        self.assertEqual(self.encoder.decode("мунзе конза"), "земун закон")
+        self.assertEqual(self.encoder.decode("zemun zakon"), "zemun zakon")
+
+    def test_can_decode_word(self) -> None:
+        self.assertTrue(self.encoder.can_decode_word("munze"))
+        self.assertTrue(self.encoder.can_decode_word("конза"))
+        self.assertFalse(self.encoder.can_decode_word("zemun"))
+
+    def test_decode_short_word_and_exception_path(self) -> None:
+        self.assertEqual(self.encoder.decode_word("ab"), "ab")
+        self.assertEqual(self.encoder.decode_word("tebra"), "brate")
+
+    def test_can_decode_word_short_and_encode_latin_helpers(self) -> None:
+        self.assertFalse(self.encoder.can_decode_word("ab"))
+        self.assertEqual(self.encoder._encode_latin_word("brate"), "tebra")
+        self.assertEqual(self.encoder._encode_latin_word("a"), "a")
+
 
 class TestCyrillicOptions(unittest.TestCase):
     def test_plain_c_target_variants(self) -> None:

@@ -62,6 +62,27 @@ def detect_mode(text: str) -> Literal["satro", "utro", "leet"]:
     return "satro"
 
 
+def _looks_like_satro_encoded(
+    text: str,
+    *,
+    min_word_length: int = 3,
+    plain_c_target: str = "ц",
+    soft_tj_to_cyrillic: bool = False,
+) -> bool:
+    satro = Satrovacki(
+        min_word_length=min_word_length,
+        plain_c_target=plain_c_target,
+        soft_tj_to_cyrillic=soft_tj_to_cyrillic,
+    )
+    words = [part for part in WORD_OR_OTHER_PATTERN.findall(text) if part.isalpha()]
+    words = [word for word in words if len(word) >= min_word_length]
+    if not words:
+        return False
+
+    decodable_words = sum(1 for word in words if satro.can_decode_word(word))
+    return decodable_words > 0 and (decodable_words / len(words)) >= 0.5
+
+
 def encode_text(
     text: str,
     *,
@@ -94,6 +115,13 @@ def encode_text(
             plain_c_target=plain_c_target,
             soft_tj_to_cyrillic=soft_tj_to_cyrillic,
         )
+        if mode == "auto" and _looks_like_satro_encoded(
+            reference_text,
+            min_word_length=min_word_length,
+            plain_c_target=plain_c_target,
+            soft_tj_to_cyrillic=soft_tj_to_cyrillic,
+        ):
+            return encoder.decode(text), resolved_mode
         return encoder.encode(text), resolved_mode
 
     if resolved_mode == "utro":

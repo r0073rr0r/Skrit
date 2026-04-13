@@ -38,3 +38,7 @@ Thumbs.db
 .pypirc
 *.env.*
 .pypirc
+.claude/
+.codex/
+.kimi/
+.qwen/

@@ -259,6 +259,93 @@ class Satrovacki:
 
         return self._apply_case(word, replaced)
 
+    def decode(self, text: str) -> str:
+        parts = WORD_OR_OTHER_PATTERN.findall(text)
+        decoded_parts: list[str] = []
+
+        for part in parts:
+            if part.isalpha():
+                decoded_parts.append(self.decode_word(part))
+            else:
+                decoded_parts.append(part)
+
+        return "".join(decoded_parts)
+
+    def decode_word(self, word: str) -> str:
+        if len(word) < self.min_word_length:
+            return word
+
+        output_script_is_cyrillic = _contains_cyrillic(word)
+        normalized_latin = _cyrillic_to_latin(word) if output_script_is_cyrillic else word
+        lower_word = normalized_latin.lower()
+
+        reverse_exceptions = {value: key for key, value in self.exceptions.items()}
+        replaced = reverse_exceptions.get(lower_word)
+
+        if replaced is None:
+            candidates = self._decode_candidates(lower_word)
+            if candidates:
+                replaced = self._pick_best_decode_candidate(candidates)
+            else:
+                replaced = lower_word
+
+        if output_script_is_cyrillic:
+            replaced = _latin_to_cyrillic(
+                replaced,
+                use_tj_for_c=self.soft_tj_to_cyrillic,
+                plain_c_target=self.plain_c_target,
+            )
+
+        return self._apply_case(word, replaced)
+
+    def can_decode_word(self, word: str) -> bool:
+        if len(word) < self.min_word_length:
+            return False
+
+        normalized_latin = _cyrillic_to_latin(word) if _contains_cyrillic(word) else word
+        lower_word = normalized_latin.lower()
+        reverse_exceptions = {value: key for key, value in self.exceptions.items()}
+        if lower_word in reverse_exceptions:
+            return True
+        return bool(self._decode_candidates(lower_word))
+
+    def _encode_latin_word(self, lower_word: str) -> str:
+        replaced = self.exceptions.get(lower_word)
+        if replaced is not None:
+            return replaced
+
+        split_index = self._find_split_index(lower_word)
+        if split_index <= 0 or split_index >= len(lower_word):
+            return lower_word
+        return lower_word[split_index:] + lower_word[:split_index]
+
+    def _decode_candidates(self, lower_word: str) -> list[tuple[int, str]]:
+        candidates: list[tuple[int, str]] = []
+        for split_index in range(1, len(lower_word)):
+            candidate = lower_word[-split_index:] + lower_word[:-split_index]
+            if self._encode_latin_word(candidate) == lower_word:
+                candidates.append((split_index, candidate))
+        return candidates
+
+    def _pick_best_decode_candidate(
+        self, candidates: list[tuple[int, str]]
+    ) -> str:
+        half = len(candidates[0][1]) / 2.0
+        vowels = self.vowels.lower()
+
+        def score(item: tuple[int, str]) -> tuple[float, int, int, int]:
+            split_index, candidate = item
+            second_is_vowel = int(len(candidate) > 1 and candidate[1] in vowels)
+            starts_with_consonant = int(candidate and candidate[0] not in vowels)
+            return (
+                abs(split_index - half),
+                -second_is_vowel,
+                -starts_with_consonant,
+                split_index,
+            )
+
+        return min(candidates, key=score)[1]
+
     def _find_split_index(self, word: str) -> int:
         vowels = self.vowels.lower()
 
