@@ -5,6 +5,11 @@
 [![License: GPL-3.0-or-later](https://img.shields.io/badge/License-GPL--3.0--or--later-blue.svg)](LICENSE)
 <!-- [![CI](https://img.shields.io/github/actions/workflow/status/r0073rr0r/Skrit/ci.yml?branch=main&label=CI)](https://github.com/r0073rr0r/Skrit/actions/workflows/ci.yml) -->
 [![Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)](.coveragerc)
+[![GitHub Stars](https://img.shields.io/github/stars/r0073rr0r/Skrit?style=social)](https://github.com/r0073rr0r/Skrit/stargazers)
+[![GitHub Forks](https://img.shields.io/github/forks/r0073rr0r/Skrit?style=social)](https://github.com/r0073rr0r/Skrit/network/members)
+[![GitHub Issues](https://img.shields.io/github/issues/r0073rr0r/Skrit)](https://github.com/r0073rr0r/Skrit/issues)
+[![Last Commit](https://img.shields.io/github/last-commit/r0073rr0r/Skrit)](https://github.com/r0073rr0r/Skrit/commits/main)
+[![PyPI - Wheel](https://img.shields.io/pypi/wheel/skrit)](https://pypi.org/project/skrit/)
 [![PyPI Downloads](https://img.shields.io/pypi/dm/skrit)](https://pypi.org/project/skrit/)
 
 Skrit is a Python toolkit for Serbian slang-style text transforms:
