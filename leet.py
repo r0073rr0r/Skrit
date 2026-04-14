@@ -39,7 +39,9 @@ LEET_TABLE: dict[str, tuple[str, ...]] = {
 # Stable profile used in previous outputs (digit-oriented "readable leet").
 BASIC_LEET_PROFILE: dict[str, str] = {
     "a": "4",
+    "b": "8",
     "e": "3",
+    "g": "6",
     "i": "1",
     "o": "0",
     "s": "5",

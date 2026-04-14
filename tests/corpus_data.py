@@ -70,7 +70,7 @@ EXPECTED_LEET_UTRO_36 = (
 )
 
 EXPECTED_BASIC_LEET_DIRECT_36 = (
-    "23m00n 24k0n m470r1 p15h70lj b423n m4čk4 2n4čk4 đ4v0 r1b4 r1b1 gr123 r3p b30gr4d "
-    "br473 7r4v4 k00ć4 pr020r šk0l4 ž00rk4 č4m4c lj00d1 nj1v4 dž3p pr57 mrk cv37 500nc3 "
-    "v0d4 k4m3n m057 40070b005 pr0gr4m š1fr4 3nkr1pc1j4 00l42 12l42"
+    "23m00n 24k0n m470r1 p15h70lj 8423n m4čk4 2n4čk4 đ4v0 r184 r181 6r123 r3p 8306r4d "
+    "8r473 7r4v4 k00ć4 pr020r šk0l4 ž00rk4 č4m4c lj00d1 nj1v4 dž3p pr57 mrk cv37 500nc3 "
+    "v0d4 k4m3n m057 400708005 pr06r4m š1fr4 3nkr1pc1j4 00l42 12l42"
 )

@@ -131,17 +131,32 @@ class Utrovacki(Satrovacki):
             return None
 
         core = lower_word[len(self.prefix) : end]
+        infix_len = len(self.infix)
 
-        split_at = core.rfind(self.infix)
-        if split_at < 0:
-            return None
-
-        second_part = core[:split_at]
-        first_part = core[split_at + len(self.infix) :]
-
-        if not second_part and not first_part:
-            return None
-        return first_part, second_part
+        # Try every occurrence of the infix; validate by checking that the
+        # reconstructed candidate would split at exactly len(first_part).
+        # This handles words where the infix string appears inside A or B
+        # (e.g. "zakon" → A="za", producing two consecutive "za" sequences).
+        search_start = 0
+        while True:
+            split_at = core.find(self.infix, search_start)
+            if split_at < 0:
+                return None
+            second_part = core[:split_at]
+            first_part = core[split_at + infix_len :]
+            candidate = first_part + second_part
+            candidate_split = self._find_split_index(candidate)
+            # Valid split: algorithm agrees on where A ends, and it's not a
+            # degenerate edge (split at 0 or at full length means no rotation).
+            if second_part or first_part:
+                candidate_split = self._find_split_index(candidate)
+                # Normal split: algorithm agrees where A ends, non-degenerate.
+                is_normal = 0 < candidate_split == len(first_part) < len(candidate)
+                # Degenerate split: whole word became B (A=""), vokal is last.
+                is_degenerate = not first_part and candidate_split >= len(candidate)
+                if is_normal or is_degenerate:
+                    return first_part, second_part
+            search_start = split_at + 1
 
 
 def _ensure_utf8_stdout() -> None:

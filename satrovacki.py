@@ -332,26 +332,46 @@ class Satrovacki:
     ) -> str:
         half = len(candidates[0][1]) / 2.0
 
-        def score(item: tuple[int, str]) -> tuple[float, int, int, int]:
+        def score(item: tuple[int, str]) -> tuple[int, float, int, int]:
             split_index, candidate = item
             second_is_vowel = int(len(candidate) > 1 and self._is_vowel_at(candidate, 1))
             starts_with_consonant = int(candidate and not self._is_vowel_at(candidate, 0))
             return (
-                abs(split_index - half),
+                -starts_with_consonant,    # prefer consonant-initial candidates first
+                abs(split_index - half),   # then prefer split near the midpoint
                 -second_is_vowel,
-                -starts_with_consonant,
                 split_index,
             )
 
         return min(candidates, key=score)[1]
 
     def _find_split_index(self, word: str) -> int:
-        for index, char in enumerate(word):
-            if self._is_vowel_at(word, index):
+        # Seek the first vowel that follows at least one consonant.
+        # For vowel-initial words the leading vowel block is skipped so that
+        # the split falls after the next interior vowel group (e.g.
+        # "enkripcija" splits at 5 → A="enkri", B="pcija" → "pcijaenkri").
+        # If the interior split would be degenerate (B==ε), fall back to
+        # len//2 so short vowel-initial words rotate instead of staying put
+        # (e.g. "ajde" → split=2 → A="aj", B="de" → "deaj").
+        seen_consonant = False
+        initial_vowel_end = 0
+
+        for index in range(len(word)):
+            if not self._is_vowel_at(word, index):
+                seen_consonant = True
+            elif seen_consonant:
                 split_index = index + 1
                 while split_index < len(word) and self._is_vowel_at(word, split_index):
                     split_index += 1
-                return split_index
+                if split_index < len(word):
+                    return split_index      # non-degenerate: use it
+                return len(word) // 2      # degenerate: midpoint fallback
+            else:
+                initial_vowel_end = index + 1  # track end of leading vowel block
+
+        # No interior vowel: fall back to the end of the leading vowel block.
+        if initial_vowel_end > 0:
+            return initial_vowel_end
 
         return len(word) // 2
 

@@ -61,7 +61,7 @@ class TestSkriptRouter(unittest.TestCase):
         self.assertEqual(leet_mode, "leet")
         self.assertEqual(satro, "zenba")
         self.assertEqual(utro, "uzenzabanje")
-        self.assertEqual(leet, "23nb4")
+        self.assertEqual(leet, "23n84")
 
     def test_leet_full_complexity_passthrough(self) -> None:
         encoded, mode = encode_text(

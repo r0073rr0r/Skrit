@@ -21,7 +21,7 @@ class TestSatrovackiEncode(unittest.TestCase):
         self.assertEqual(self.encoder.encode("brate BRATE Brate"), "tebra TEBRA Tebra")
 
     def test_punctuation_and_numbers(self) -> None:
-        self.assertEqual(self.encoder.encode("123, ajde!"), "123, jdea!")
+        self.assertEqual(self.encoder.encode("123, ajde!"), "123, deaj!")
 
     def test_min_word_length(self) -> None:
         encoder = Satrovacki(min_word_length=5)
